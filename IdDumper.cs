@@ -94,7 +94,7 @@ namespace IdDumper
             List<string> csvBuilder = new List<string> { "ID,Name" };
             foreach (TileObject tileObject in __instance.allObjects)
             {
-                csvBuilder.Add(string.Join(",", tileObject.name.Split(' ')));
+                csvBuilder.Add(string.Join(",", tileObject.name.Split(new char[] { ' ' }, 2)));
             }
 
             string outputFilePath = Path.Combine(Paths.BepInExRootPath, "DumpedTileObjectIds.csv");
@@ -108,7 +108,7 @@ namespace IdDumper
             csvBuilder = new List<string> { "ID,Name" };
             foreach (TileTypes tileTypes in __instance.tileTypes)
             {
-                csvBuilder.Add(string.Join(",", tileTypes.name.Split(' ')));
+                csvBuilder.Add(string.Join(",", tileTypes.name.Split(new char[] { ' ' }, 2)));
             }
 
             outputFilePath = Path.Combine(Paths.BepInExRootPath, "DumpedTileTypeIds.csv");
@@ -135,7 +135,7 @@ namespace IdDumper
             List<string> csvBuilder = new List<string> { "ID,Name" };
             foreach (GameObject carryable in __instance.carryablePrefabs)
             {
-                csvBuilder.Add(string.Join(",", carryable.name.Split(' ')));
+                csvBuilder.Add(string.Join(",", carryable.name.Split(new char[] { ' ' }, 2)));
                 // csvBuilder.Add(string.Join(",", pickUpAndCarry.prefabId.ToString(), pickUpAndCarry.GetName(), pickUpAndCarry.canBePickedUp.ToString(), isFragile.GetValue(pickUpAndCarry).ToString(), pickUpAndCarry.investigationItem.ToString(), pickUpAndCarry.photoRequestable.ToString()));
             }
 
