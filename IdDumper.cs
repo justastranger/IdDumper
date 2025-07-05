@@ -103,6 +103,20 @@ namespace IdDumper
 
             IdDumper.Logger.LogMessage("TileObject IDs successfully dumped to: " + outputFilePath);
             #endregion
+
+            #region TileTypes
+            csvBuilder = new List<string> { "ID,Name" };
+            foreach (TileTypes tileTypes in __instance.tileTypes)
+            {
+                csvBuilder.Add(string.Join(",", tileTypes.name.Split(' ')));
+            }
+
+            outputFilePath = Path.Combine(Paths.BepInExRootPath, "DumpedTileTypeIds.csv");
+            if (File.Exists(outputFilePath)) File.Delete(outputFilePath);
+            File.WriteAllText(outputFilePath, string.Join("\r\n", csvBuilder));
+
+            IdDumper.Logger.LogMessage("TileType IDs successfully dumped to: " + outputFilePath);
+            #endregion
         }
     }
 
