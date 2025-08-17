@@ -3,6 +3,7 @@ using BepInEx.Logging;
 using HarmonyLib;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
@@ -75,8 +76,50 @@ namespace IdDumper
 
             IdDumper.Logger.LogMessage("Animal IDs successfully dumped to: " + outputFilePath);
             #endregion
+
+            #region Animal Drops
+            // drop lists
+            // AnimalAI.myDamageable
+            // AnimalAI.myDamageable.lootDrops
+            // AnimalAI.myDamageable.guaranteedDrops
+            FieldInfo myDamageable = AccessTools.Field(typeof(AnimalAI), "myDamageable");
+            foreach (AnimalAI animal in __instance.allAnimals)
+            {
+                List<string> csvDropsBuilder = new List<string> { "ID,Name,Chance" };
+                Damageable damageable = animal.GetComponent<Damageable>();
+                if (damageable == null)
+                {
+                    IdDumper.Logger.LogMessage("Damageable null for " + animal.name);
+                    continue;
+                }
+
+                if (damageable.guaranteedDrops != null)
+                {
+                    List<string> itemIDs, itemNames, itemChances;
+                    itemIDs = damageable.guaranteedDrops.itemsInLootTable.Select(item => item?.getItemId().ToString() ?? "null").ToList();
+                    itemNames = damageable.guaranteedDrops.itemsInLootTable.Select(item => item?.getInvItemName() ?? "nothing").ToList();
+                    itemChances = damageable.guaranteedDrops.rarityPercentage.Select(chance => chance.ToString()).ToList();
+                    List<string> combined = Enumerable.Range(0, itemIDs.Count()).Select(i => $"{itemIDs[i]},{itemNames[i]},{itemChances[i]}").ToList();
+                    csvDropsBuilder.AddRange(combined);
+                }
+                if (damageable.lootDrops != null)
+                {
+                    List<string> itemIDs, itemNames, itemChances;
+                    itemIDs = damageable.lootDrops.itemsInLootTable.Select(item => item?.getItemId().ToString() ?? "null").ToList();
+                    itemNames = damageable.lootDrops.itemsInLootTable.Select(item => item?.getInvItemName() ?? "nothing").ToList();
+                    itemChances = damageable.lootDrops.rarityPercentage.Select(chance => chance.ToString()).ToList();
+                    List<string> combined = Enumerable.Range(0, itemIDs.Count()).Select(i => $"{itemIDs[i]},{itemNames[i]},{itemChances[i]}").ToList();
+                    csvDropsBuilder.AddRange(combined);
+                }
+                string outputDropsFilePath = Path.Combine(Paths.BepInExRootPath, $"Dumped{animal.GetAnimalName()}Drops.csv");
+                if (File.Exists(outputDropsFilePath)) File.Delete(outputDropsFilePath);
+                File.WriteAllText(outputDropsFilePath, string.Join("\r\n", csvDropsBuilder));
+                IdDumper.Logger.LogMessage("Animal drops successfully dumped to: " + outputDropsFilePath);
+            }
+            #endregion
         }
     }
+
 
     [HarmonyPatch(typeof(WorldManager))]
     public class WorldManagerPatch
